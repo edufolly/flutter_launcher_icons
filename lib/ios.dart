@@ -57,7 +57,25 @@ void createIcons(FlutterLauncherIconsConfig config, String? flavor) {
     if(backgroundColor != null) {
       final Image withBackground = Image(image.width, image.height);
       fill(withBackground, backgroundColor);
-      image = drawImage(withBackground, image);
+
+      // TODO(edufolly): Create a parameter.
+      const double padding = 10;
+      const double percent = 1 - (padding / 100.0);
+
+      final double dstW = image.width * percent;
+      final double dstH = image.height * percent;
+
+      final double dstX = (image.width - dstW) / 2.0;
+      final double dstY = (image.height - dstH) / 2.0;
+
+      image = drawImage(
+        withBackground,
+        image,
+        dstX: dstX.toInt(),
+        dstY: dstY.toInt(),
+        dstW: dstW.toInt(),
+        dstH: dstH.toInt(),
+      );
     } else {
       print('\nWARNING: Invalid adaptive_icon_background for iOS.');
     }
