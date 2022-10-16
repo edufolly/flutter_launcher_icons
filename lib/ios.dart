@@ -59,7 +59,7 @@ void createIcons(FlutterLauncherIconsConfig config, String? flavor) {
       fill(withBackground, backgroundColor);
 
       // TODO(edufolly): Create a parameter.
-      const double padding = 10;
+      const double padding = 16;
       const double percent = 1 - (padding / 100.0);
 
       final double dstW = image.width * percent;
