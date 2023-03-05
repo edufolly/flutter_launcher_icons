@@ -55,9 +55,46 @@ void createIcons(FlutterLauncherIconsConfig config, String? flavor) {
   }
   // decodeImageFile shows error message if null
   // so can return here if image is null
-  final Image? image = decodeImage(File(filePath).readAsBytesSync());
+  Image? image = decodeImage(File(filePath).readAsBytesSync());
   if (image == null) {
     return;
+  }
+  final String? backgroundConfig = config.adaptiveIconBackground;
+  if (RegExp(r'^#?[0-9a-fA-F]{6}$').hasMatch(backgroundConfig ?? '')) {
+    final int? bg =
+        int.tryParse(backgroundConfig!.replaceAll('#', ''), radix: 16);
+    if (bg != null) {
+      final Image withBackground = Image(
+        width: image.width,
+        height: image.height,
+      );
+
+      fill(
+        withBackground,
+        color: ColorRgb8(bg & 0x000000FF, bg & 0x0000FF00, bg & 0x00FF0000),
+      );
+
+      // TODO(edufolly): Create a parameter.
+      const double padding = 10;
+      const double percent = 1 - (padding / 100.0);
+
+      final double dstW = image.width * percent;
+      final double dstH = image.height * percent;
+
+      final double dstX = (image.width - dstW) / 2.0;
+      final double dstY = (image.height - dstH) / 2.0;
+
+      image = compositeImage(
+        withBackground,
+        image,
+        dstX: dstX.toInt(),
+        dstY: dstY.toInt(),
+        dstW: dstW.toInt(),
+        dstH: dstH.toInt(),
+      );
+    } else {
+      print('\nWARNING: Invalid adaptive_icon_background for iOS.');
+    }
   }
   if (config.removeAlphaIOS) {
     image.remapChannels(ChannelOrder.rgb);
