@@ -1,3 +1,5 @@
+// ignore_for_file: public_member_api_docs
+
 import 'dart:convert';
 import 'dart:io';
 
@@ -9,12 +11,17 @@ import 'package:image/image.dart';
 
 /// File to handle the creation of icons for iOS platform
 class IosIconTemplate {
+  /// constructs an instance of [IosIconTemplate]
   IosIconTemplate({required this.size, required this.name});
 
+  /// suffix of the icon name
   final String name;
+
+  /// the size of the icon
   final int size;
 }
 
+/// details of the ios icons which need to be generated
 List<IosIconTemplate> iosIcons = <IosIconTemplate>[
   IosIconTemplate(name: '-20x20@1x', size: 20),
   IosIconTemplate(name: '-20x20@2x', size: 40),
@@ -39,53 +46,23 @@ List<IosIconTemplate> iosIcons = <IosIconTemplate>[
   IosIconTemplate(name: '-1024x1024@1x', size: 1024),
 ];
 
+/// create the ios icons
 void createIcons(FlutterLauncherIconsConfig config, String? flavor) {
-  // todo: support prefixPath
+  // TODO(p-mazhnik): support prefixPath
   final String? filePath = config.getImagePathIOS();
   if (filePath == null) {
     throw const InvalidConfigException(errorMissingImagePath);
   }
   // decodeImageFile shows error message if null
   // so can return here if image is null
-  Image? image = decodeImage(File(filePath).readAsBytesSync());
+  final Image? image = decodeImage(File(filePath).readAsBytesSync());
   if (image == null) {
     return;
   }
-
-  final String? backgroundConfig = config.adaptiveIconBackground;
-  if(RegExp(r'^#?[0-9a-fA-F]{6}$').hasMatch(backgroundConfig ?? '')) {
-    final int? backgroundColor = int.tryParse(backgroundConfig!.replaceAll('#', ''), radix: 16);
-    if(backgroundColor != null) {
-      final Image withBackground = Image(image.width, image.height);
-      fill(withBackground, backgroundColor);
-
-      // TODO(edufolly): Create a parameter.
-      const double padding = 16;
-      const double percent = 1 - (padding / 100.0);
-
-      final double dstW = image.width * percent;
-      final double dstH = image.height * percent;
-
-      final double dstX = (image.width - dstW) / 2.0;
-      final double dstY = (image.height - dstH) / 2.0;
-
-      image = drawImage(
-        withBackground,
-        image,
-        dstX: dstX.toInt(),
-        dstY: dstY.toInt(),
-        dstW: dstW.toInt(),
-        dstH: dstH.toInt(),
-      );
-    } else {
-      print('\nWARNING: Invalid adaptive_icon_background for iOS.');
-    }
-  }
-
   if (config.removeAlphaIOS) {
-    image.channels = Channels.rgb;
+    image.remapChannels(ChannelOrder.rgb);
   }
-  if (image.channels == Channels.rgba) {
+  if (image.hasAlpha) {
     print(
       '\nWARNING: Icons with alpha channel are not allowed in the Apple App Store.\nSet "remove_alpha_ios: true" to remove it.\n',
     );
@@ -147,6 +124,7 @@ void saveNewIcons(IosIconTemplate template, Image image, String newIconName) {
   });
 }
 
+/// create resized icon image
 Image createResizedImage(IosIconTemplate template, Image image) {
   if (image.width >= template.size) {
     return copyResize(
@@ -165,6 +143,7 @@ Image createResizedImage(IosIconTemplate template, Image image) {
   }
 }
 
+/// Change the iOS launcher icon
 Future<void> changeIosLauncherIcon(String iconName, String? flavor) async {
   final File iOSConfigFile = File(iosConfigFile);
   final List<String> lines = await iOSConfigFile.readAsLines();
