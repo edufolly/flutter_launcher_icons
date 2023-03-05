@@ -71,7 +71,7 @@ void createIcons(FlutterLauncherIconsConfig config, String? flavor) {
 
       fill(
         withBackground,
-        color: ColorRgb8(bg & 0x000000FF, bg & 0x0000FF00, bg & 0x00FF0000),
+        color: ColorRgb8((bg >> 16) & 0xFF, (bg >> 8) & 0xFF, bg & 0xFF),
       );
 
       // TODO(edufolly): Create a parameter.
